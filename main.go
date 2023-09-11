@@ -4,7 +4,9 @@ import (
 	"auth_api/config"
 	"auth_api/database"
 	"auth_api/handlers"
+	"auth_api/repository"
 	"auth_api/server"
+	"auth_api/usecase"
 	"log"
 	"net/http"
 
@@ -21,9 +23,13 @@ func main() {
 	instance := database.ConnectSingleton(config.PostgresConn)
 	database.Migrate(instance)
 
-	usersHandler := handlers.NewUsersHandler()
-	server := server.NewServer(":" + config.Port)
+	userRepo := repository.NewUserRepositoryPSQL(instance)
 
+	userUsecase := usecase.NewUserUsecase(userRepo)
+
+	usersHandler := handlers.NewUsersHandler(userUsecase)
+
+	server := server.NewServer(":" + config.Port)
 	server.AddHandler("/", "GET", func(ctx *gin.Context) { ctx.JSON(http.StatusOK, "up and running...") })
 	server.Router.NoRoute(func(ctx *gin.Context) { ctx.JSON(http.StatusNotFound, gin.H{"message": "page not found"}) })
 	server.AddHandler("/users/register", "POST", usersHandler.Register)

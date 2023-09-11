@@ -67,5 +67,4 @@ func (s *Server) Start() {
 	}
 	<-ctx.Done()
 	log.Println("Server successfully ended!")
-
 }
