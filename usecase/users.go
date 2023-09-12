@@ -2,8 +2,10 @@ package usecase
 
 import (
 	"auth_api/entity"
+	"auth_api/errorConst"
 	"auth_api/gateway"
 	"errors"
+	"strings"
 )
 
 type UserUsecase struct {
@@ -11,10 +13,9 @@ type UserUsecase struct {
 }
 
 type UserInput struct {
-	Name            string `json:"name"`
-	Email           string `json:"email"`
-	Password        string `json:"password"`
-	PasswordConfirm string `json:"passwordConfirm"`
+	Name     string `json:"name"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
 }
 
 func NewUserUsecase(gateway gateway.UserGateway) *UserUsecase {
@@ -22,9 +23,7 @@ func NewUserUsecase(gateway gateway.UserGateway) *UserUsecase {
 }
 
 func (u *UserUsecase) CreateUser(userInput UserInput) (*entity.UserOutput, error) {
-	if userInput.Password != userInput.PasswordConfirm {
-		return nil, errors.New("password and confirmation password don't match")
-	}
+
 	user := &entity.User{
 		Name:     userInput.Name,
 		Email:    userInput.Email,
@@ -33,6 +32,9 @@ func (u *UserUsecase) CreateUser(userInput UserInput) (*entity.UserOutput, error
 	}
 	userOutput, err := u.gateway.CreateUser(user)
 	if err != nil {
+		if strings.Contains(err.Error(), "duplicate key value violates unique constraint") {
+			return nil, errors.New(errorConst.EMAIL_REGISTERED)
+		}
 		return nil, err
 	}
 	return userOutput, nil

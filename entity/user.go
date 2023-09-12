@@ -70,13 +70,13 @@ func (u *User) Validate() error {
 		return fmt.Errorf("einvalid email: %v", err)
 	}
 
-	if !isPasswordValid(u.Password) {
+	if !IsPasswordValid(u.Password) {
 		return errors.New("invalid password")
 	}
 	return nil
 }
 
-func isPasswordValid(p string) bool {
+func IsPasswordValid(p string) bool {
 	var (
 		hasNumber  = false
 		hasUpper   = false
