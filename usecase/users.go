@@ -23,7 +23,6 @@ func NewUserUsecase(gateway gateway.UserGateway) *UserUsecase {
 }
 
 func (u *UserUsecase) CreateUser(userInput UserInput) (*entity.UserOutput, error) {
-
 	user := &entity.User{
 		Name:     userInput.Name,
 		Email:    userInput.Email,
@@ -38,4 +37,12 @@ func (u *UserUsecase) CreateUser(userInput UserInput) (*entity.UserOutput, error
 		return nil, err
 	}
 	return userOutput, nil
+}
+
+func (u *UserUsecase) GetUserByEmail(email string) (*entity.User, error) {
+	user, err := u.gateway.GetUserByEmail(email)
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
 }

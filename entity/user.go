@@ -22,12 +22,10 @@ type User struct {
 	Password string `gorm:"not null"`
 }
 
-// type UserDTO struct {
-// 	ID    int    `json:"ID"`
-// 	Name  string `json:"name"`
-// 	Email string `json:"email"`
-// 	Role  string `json:"role"`
-// }
+type SignInInput struct {
+	Email    string `json:"email" binding:"required"`
+	Password string `json:"password" binding:"required"`
+}
 
 type UserOutput struct {
 	ID        int       `json:"id,omitempty"`

@@ -27,11 +27,12 @@ func main() {
 
 	userUsecase := usecase.NewUserUsecase(userRepo)
 
-	usersHandler := handlers.NewUsersHandler(userUsecase)
+	usersHandler := handlers.NewUsersHandler(userUsecase, config)
 
 	server := server.NewServer(":" + config.Port)
 	server.AddHandler("/", "GET", func(ctx *gin.Context) { ctx.JSON(http.StatusOK, "up and running...") })
 	server.Router.NoRoute(func(ctx *gin.Context) { ctx.JSON(http.StatusNotFound, gin.H{"message": "page not found"}) })
-	server.AddHandler("/users/register", "POST", usersHandler.Register)
+	server.AddHandler("/auth/register", "POST", usersHandler.Register)
+	server.AddHandler("/auth/login", "POST", usersHandler.SignInUser)
 	server.Start()
 }

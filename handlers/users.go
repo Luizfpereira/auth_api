@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"auth_api/auth"
+	"auth_api/config"
 	"auth_api/entity"
 	"auth_api/errorConst"
 	"auth_api/usecase"
@@ -12,10 +13,11 @@ import (
 
 type UsersHandler struct {
 	Usecase *usecase.UserUsecase
+	config  config.Config
 }
 
-func NewUsersHandler(usecase *usecase.UserUsecase) *UsersHandler {
-	return &UsersHandler{Usecase: usecase}
+func NewUsersHandler(usecase *usecase.UserUsecase, config config.Config) *UsersHandler {
+	return &UsersHandler{Usecase: usecase, config: config}
 }
 
 func (u *UsersHandler) Register(ctx *gin.Context) {
@@ -54,4 +56,42 @@ func (u *UsersHandler) Register(ctx *gin.Context) {
 		return
 	}
 	ctx.JSON(http.StatusOK, output)
+}
+
+func (u *UsersHandler) SignInUser(ctx *gin.Context) {
+	email, ok := ctx.GetPostForm("email")
+	if !ok {
+		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "Invalid email"})
+		return
+	}
+	password, ok := ctx.GetPostForm("password")
+	if !ok {
+		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "Invalid password"})
+		return
+	}
+
+	user, err := u.Usecase.GetUserByEmail(email)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "Invalid email or password"})
+		return
+	}
+
+	if err := auth.ComparePassword(user.Password, password); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "Invalid email or password"})
+		return
+	}
+
+	accessToken, err := auth.CreateToken(u.config.AccessTokenExpiresIn, user.ID, u.config.AccessTokenPrivateKey)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"status": "fail", "message": err.Error()})
+		return
+	}
+
+	refreshToken, err := auth.CreateToken(u.config.RefreshTokenExpiresIn, user.ID, u.config.RefreshTokenPrivateKey)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"status": "fail", "message": err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"status": "success", "access_token": accessToken, "refresh_token": refreshToken})
 }

@@ -21,3 +21,12 @@ func (u *UserRepositoryPSQL) CreateUser(user *entity.User) (*entity.UserOutput, 
 	}
 	return entity.ToDTO(user), nil
 }
+
+func (u *UserRepositoryPSQL) GetUserByEmail(email string) (*entity.User, error) {
+	var user *entity.User
+	res := u.Instance.Where("email = ?", email).First(&user)
+	if res.Error != nil {
+		return nil, res.Error
+	}
+	return user, nil
+}
