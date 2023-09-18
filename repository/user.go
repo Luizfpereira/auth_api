@@ -30,3 +30,12 @@ func (u *UserRepositoryPSQL) GetUserByEmail(email string) (*entity.User, error) 
 	}
 	return user, nil
 }
+
+func (u *UserRepositoryPSQL) GetUserById(id int) (*entity.UserOutput, error) {
+	var user *entity.User
+	res := u.Instance.First(&user, id)
+	if res.Error != nil {
+		return nil, res.Error
+	}
+	return entity.ToDTO(user), nil
+}

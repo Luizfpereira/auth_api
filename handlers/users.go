@@ -95,3 +95,24 @@ func (u *UsersHandler) SignInUser(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK, gin.H{"status": "success", "access_token": accessToken, "refresh_token": refreshToken})
 }
+
+func (u *UsersHandler) Logout(ctx *gin.Context) {
+	ctx.SetCookie("access_token", "", -1, "/", "localhost", false, true)
+	ctx.SetCookie("refresh_token", "", -1, "/", "localhost", false, true)
+	ctx.SetCookie("logged_in", "", -1, "/", "localhost", false, true)
+
+	// the app should destroy the jwt tokens in storage
+	// if needed, we should create a blacklist in redis to store de invalidated tokens
+
+	ctx.JSON(http.StatusOK, gin.H{"status": "success"})
+}
+
+func (u *UsersHandler) RefreshToken(ctx *gin.Context) {
+
+}
+
+func (u *UsersHandler) GetMe(ctx *gin.Context) {
+	user := ctx.MustGet("currentUser").(*entity.UserOutput)
+
+	ctx.JSON(http.StatusOK, gin.H{"status": "success", "user": user})
+}

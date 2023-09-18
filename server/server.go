@@ -13,9 +13,8 @@ import (
 )
 
 type Server struct {
-	Port     string
-	Handlers map[string]HandlerDetails
-	Router   *gin.Engine
+	Port   string
+	Router *gin.Engine
 }
 
 type HandlerDetails struct {
@@ -23,23 +22,14 @@ type HandlerDetails struct {
 	Handler    gin.HandlerFunc
 }
 
-func NewServer(port string) *Server {
+func NewServer(port string, router *gin.Engine) *Server {
 	return &Server{
-		Port:     port,
-		Handlers: make(map[string]HandlerDetails),
-		Router:   gin.Default(),
+		Port:   port,
+		Router: router,
 	}
-}
-
-func (s *Server) AddHandler(path, httpMethod string, handler gin.HandlerFunc) {
-	s.Handlers[path] = HandlerDetails{HttpMethod: httpMethod, Handler: handler}
 }
 
 func (s *Server) Start() {
-	for path, handlerDetails := range s.Handlers {
-		s.Router.Handle(handlerDetails.HttpMethod, path, handlerDetails.Handler)
-	}
-
 	srv := &http.Server{
 		Addr:    s.Port,
 		Handler: s.Router,

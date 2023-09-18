@@ -46,3 +46,11 @@ func (u *UserUsecase) GetUserByEmail(email string) (*entity.User, error) {
 	}
 	return user, nil
 }
+
+func (u *UserUsecase) GetUserById(id int) (*entity.UserOutput, error) {
+	user, err := u.gateway.GetUserById(id)
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
+}
